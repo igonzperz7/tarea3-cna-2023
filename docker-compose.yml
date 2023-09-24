@@ -11,6 +11,8 @@ services:
       - POSTGRES_DB
       - POSTGRES_PORT=5432
       - POSTGRES_SERVER=postgres
+    volumes:
+      - ./data:/var/lib/postgresql/data
     expose:
       - 5432
 
@@ -31,3 +33,42 @@ services:
       - ./sql_migrations:/flyway/sql
     depends_on:
       - postgres
+      
+  frontend:
+    build: chat-frontend
+    restart: always
+    environment:
+      - FRONT_PORT
+    expose: 
+      - 80
+    ports:
+      - ${FRONT_PORT}:80
+    volumes:
+      - ./nginx-conf/default.conf:/etc/nginx/conf.d/default.conf
+ 
+  users-svc:
+    build: users-svc
+    command: "node app.js" 
+    restart: always
+    expose:
+      - 3000
+    environment:
+      - JWT_SECRET
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - POSTGRES_PORT=5432
+      - POSTGRES_SERVER=postgres
+      - PORT=3000
+      - CONNECTION_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      - postgres
+  
+  ws-server:
+    build: ws-server
+    command: "node index.js"
+    restart: always
+    expose:
+      - 3001
+    environment:
+      - PORT=3001
