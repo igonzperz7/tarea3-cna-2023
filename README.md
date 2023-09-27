@@ -195,3 +195,4 @@ Contiene los registros ingresados inicialmente. (No se pierden).
 
 Integrantes:
 - Ignacio J. González P.
+- Felix Cifuentes Cid.
